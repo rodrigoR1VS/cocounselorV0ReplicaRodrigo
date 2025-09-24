@@ -34,6 +34,7 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
   const [loadingBlog, setLoadingBlog] = useState(false);
   const [blogNotFound, setBlogNotFound] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
+  const [keywordsInput, setKeywordsInput] = useState('');
   
   const [blogData, setBlogData] = useState<BlogData>({
     title: '',
@@ -107,6 +108,8 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
           content: blog.content,
           seo: blog.seo
         });
+        // Set keywords input with the existing keywords
+        setKeywordsInput(blog.seo.keywords.join(', '));
       } else if (response.status === 404) {
         setBlogNotFound(true);
       } else {
@@ -413,15 +416,37 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
                     type="text"
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="keyword1, keyword2, keyword3"
-                    value={blogData.seo.keywords.join(', ')}
-                    onChange={(e) => setBlogData(prev => ({ 
-                      ...prev, 
-                      seo: { 
-                        ...prev.seo, 
-                        keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
-                      }
-                    }))}
+                    value={keywordsInput}
+                    onChange={(e) => {
+                      const input = e.target.value;
+                      setKeywordsInput(input);
+                      
+                      // Update keywords array in real time
+                      const keywordsArray = input.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                      setBlogData(prev => ({ 
+                        ...prev, 
+                        seo: { 
+                          ...prev.seo, 
+                          keywords: keywordsArray
+                        }
+                      }));
+                    }}
                   />
+                  {blogData.seo.keywords.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 mb-1">Keywords preview:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {blogData.seo.keywords.map((keyword, index) => (
+                          <span
+                            key={index}
+                            className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
