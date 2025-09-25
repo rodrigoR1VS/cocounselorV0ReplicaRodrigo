@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { BlogStorage } from '@/lib/blogStorage';
 
 interface RouteParams {
-  params: { blogId: string };
+  params: { slug: string };
 }
 
-// GET individual blog
+// GET individual blog by slug
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { blogId } = params;
-    const blogsPath = path.join(process.cwd(), 'blogs.json');
-    const fileContent = fs.readFileSync(blogsPath, 'utf8');
-    const blogsJson = JSON.parse(fileContent);
-
-    const blog = blogsJson.blogs.find((b: any) => b.blogId === blogId);
+    const { slug } = params;
+    const blog = await BlogStorage.getBlogBySlug(slug);
     
     if (!blog) {
       return NextResponse.json(
@@ -36,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // UPDATE blog
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { blogId } = params;
+    const { slug } = params;
     const updateData = await request.json();
     
     // Validate required fields
@@ -47,29 +42,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const blogsPath = path.join(process.cwd(), 'blogs.json');
-    const fileContent = fs.readFileSync(blogsPath, 'utf8');
-    const blogsJson = JSON.parse(fileContent);
-
-    const blogIndex = blogsJson.blogs.findIndex((b: any) => b.blogId === blogId);
-    
-    if (blogIndex === -1) {
+    // First get the blog by slug to get its ID
+    const existingBlog = await BlogStorage.getBlogBySlug(slug);
+    if (!existingBlog) {
       return NextResponse.json(
         { error: 'Blog not found' },
         { status: 404 }
       );
     }
 
-    // Update blog object while preserving blogId and publishedDate
-    const existingBlog = blogsJson.blogs[blogIndex];
-    const updatedBlog = {
-      blogId: existingBlog.blogId,
-      publishedDate: existingBlog.publishedDate,
+    // Prepare update data
+    const blogUpdate = {
       title: updateData.title,
       subtitle: updateData.subtitle,
       bannerImage: updateData.bannerImage,
       content: updateData.content.map((paragraph: any, index: number) => ({
-        paragraphId: index + 1,
         content: paragraph.content,
         img: paragraph.img || null
       })),
@@ -80,18 +67,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }
     };
 
-    blogsJson.blogs[blogIndex] = updatedBlog;
+    // Use BlogStorage to update the blog
+    const result = await BlogStorage.updateBlog(existingBlog.id, blogUpdate);
 
-    // Write back to file
-    fs.writeFileSync(blogsPath, JSON.stringify(blogsJson, null, 4));
-
-    return NextResponse.json(
-      { 
-        message: 'Blog updated successfully', 
-        blog: updatedBlog 
-      },
-      { status: 200 }
-    );
+    if (result.success) {
+      return NextResponse.json(
+        { 
+          message: 'Blog updated successfully', 
+          blog: result.blog 
+        },
+        { status: 200 }
+      );
+    } else {
+      const status = result.error === 'Blog not found' ? 404 : 500;
+      return NextResponse.json(
+        { error: result.error },
+        { status }
+      );
+    }
 
   } catch (error) {
     console.error('Error updating blog:', error);
@@ -105,33 +98,35 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE blog
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { blogId } = params;
-    const blogsPath = path.join(process.cwd(), 'blogs.json');
-    const fileContent = fs.readFileSync(blogsPath, 'utf8');
-    const blogsJson = JSON.parse(fileContent);
+    const { slug } = params;
 
-    const blogIndex = blogsJson.blogs.findIndex((b: any) => b.blogId === blogId);
-    
-    if (blogIndex === -1) {
+    // First get the blog by slug to get its ID
+    const existingBlog = await BlogStorage.getBlogBySlug(slug);
+    if (!existingBlog) {
       return NextResponse.json(
         { error: 'Blog not found' },
         { status: 404 }
       );
     }
 
-    // Remove blog from array
-    const deletedBlog = blogsJson.blogs.splice(blogIndex, 1)[0];
+    // Use BlogStorage to delete the blog
+    const result = await BlogStorage.deleteBlog(existingBlog.id);
 
-    // Write back to file
-    fs.writeFileSync(blogsPath, JSON.stringify(blogsJson, null, 4));
-
-    return NextResponse.json(
-      { 
-        message: 'Blog deleted successfully',
-        deletedBlog: deletedBlog
-      },
-      { status: 200 }
-    );
+    if (result.success) {
+      return NextResponse.json(
+        { 
+          message: 'Blog deleted successfully',
+          deletedBlog: result.deletedBlog
+        },
+        { status: 200 }
+      );
+    } else {
+      const status = result.error === 'Blog not found' ? 404 : 500;
+      return NextResponse.json(
+        { error: result.error },
+        { status }
+      );
+    }
 
   } catch (error) {
     console.error('Error deleting blog:', error);

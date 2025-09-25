@@ -80,13 +80,30 @@ export const adminAuth = {
     }
   },
 
-  // Verify password and login if correct
-  verifyAndLogin(password: string): boolean {
-    const isValid = password === 'weAreMarketing2025!#';
-    if (isValid) {
-      this.login();
+  // Verify credentials and login if correct
+  async verifyAndLogin(username: string, password: string): Promise<boolean> {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          this.login();
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return isValid;
   }
 };
 
@@ -98,7 +115,7 @@ export const useAdminAuth = () => {
       login: () => {},
       logout: () => {},
       getRemainingTime: () => 0,
-      verifyAndLogin: () => false
+      verifyAndLogin: async () => false
     };
   }
   

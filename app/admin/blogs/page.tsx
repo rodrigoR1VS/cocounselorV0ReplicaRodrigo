@@ -10,19 +10,19 @@ interface BlogData {
   subtitle: string;
   bannerImage: string;
   content: Array<{
-    paragraphId: number;
     content: string;
     img: string | null;
   }>;
   seo: {
     metaTitle: string;
     metaDescription: string;
-    keywords: string[];
+    keywords: string;
   };
 }
 
 export default function BlogAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,11 +34,11 @@ export default function BlogAdminPage() {
     title: '',
     subtitle: '',
     bannerImage: '',
-    content: [{ paragraphId: 1, content: '', img: null }],
+    content: [{ content: '', img: null }],
     seo: {
       metaTitle: '',
       metaDescription: '',
-      keywords: []
+      keywords: ''
     }
   });
 
@@ -67,16 +67,17 @@ export default function BlogAdminPage() {
     return () => clearInterval(interval);
   }, [auth]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    if (auth.verifyAndLogin(password)) {
+    const isValid = await auth.verifyAndLogin(username, password);
+    if (isValid) {
       setIsAuthenticated(true);
       setRemainingTime(auth.getRemainingTime());
     } else {
-      setError('Incorrect password');
+      setError('Incorrect username or password');
     }
     
     setIsLoading(false);
@@ -88,7 +89,6 @@ export default function BlogAdminPage() {
       content: [
         ...prev.content,
         {
-          paragraphId: prev.content.length + 1,
           content: '',
           img: null
         }
@@ -136,11 +136,11 @@ export default function BlogAdminPage() {
           title: '',
           subtitle: '',
           bannerImage: '',
-          content: [{ paragraphId: 1, content: '', img: null }],
+          content: [{ content: '', img: null }],
           seo: {
             metaTitle: '',
             metaDescription: '',
-            keywords: []
+            keywords: ''
           }
         });
       } else {
@@ -162,10 +162,25 @@ export default function BlogAdminPage() {
               Blog Administration
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Enter password to access
+              Enter credentials to access
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            <div>
+              <label htmlFor="username" className="sr-only">
+                Username
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
             <div>
               <label htmlFor="password" className="sr-only">
                 Password
@@ -373,21 +388,21 @@ export default function BlogAdminPage() {
                       setKeywordsInput(input);
                       
                       // Update keywords array in real time
-                      const keywordsArray = input.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                      const keywordsText = input.trim();
                       setBlogData(prev => ({ 
                         ...prev, 
                         seo: { 
                           ...prev.seo, 
-                          keywords: keywordsArray
+                          keywords: keywordsText
                         }
                       }));
                     }}
                   />
-                  {blogData.seo.keywords.length > 0 && (
+                  {blogData.seo.keywords && blogData.seo.keywords.trim().length > 0 && (
                     <div className="mt-2">
                       <p className="text-xs text-gray-500 mb-1">Keywords preview:</p>
                       <div className="flex flex-wrap gap-1">
-                        {blogData.seo.keywords.map((keyword, index) => (
+                        {blogData.seo.keywords.split(',').map((keyword, index) => keyword.trim()).filter(Boolean).map((keyword, index) => (
                           <span
                             key={index}
                             className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"

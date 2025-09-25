@@ -17,7 +17,7 @@ interface BlogData {
   seo: {
     metaTitle: string;
     metaDescription: string;
-    keywords: string[];
+    keywords: string;
   };
 }
 
@@ -27,6 +27,7 @@ interface EditBlogPageProps {
 
 export default function EditBlogPage({ params }: EditBlogPageProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,6 +36,7 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
   const [blogNotFound, setBlogNotFound] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
   const [keywordsInput, setKeywordsInput] = useState('');
+  const [blogSlug, setBlogSlug] = useState('');
   
   const [blogData, setBlogData] = useState<BlogData>({
     title: '',
@@ -84,12 +86,13 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
     setIsLoading(true);
     setError('');
 
-    if (auth.verifyAndLogin(password)) {
+    const isValid = await auth.verifyAndLogin(username, password);
+    if (isValid) {
       setIsAuthenticated(true);
       setRemainingTime(auth.getRemainingTime());
       await fetchBlog();
     } else {
-      setError('Incorrect password');
+      setError('Incorrect username or password');
     }
     
     setIsLoading(false);
@@ -98,7 +101,7 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
   const fetchBlog = async () => {
     setLoadingBlog(true);
     try {
-      const response = await fetch(`/api/blogs/${blogId}`);
+      const response = await fetch(`/api/blogs/id/${blogId}`);
       if (response.ok) {
         const blog = await response.json();
         setBlogData({
@@ -109,7 +112,9 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
           seo: blog.seo
         });
         // Set keywords input with the existing keywords
-        setKeywordsInput(blog.seo.keywords.join(', '));
+        setKeywordsInput(blog.seo.keywords || '');
+        // Set the blog slug
+        setBlogSlug(blog.slug || '');
       } else if (response.status === 404) {
         setBlogNotFound(true);
       } else {
@@ -160,7 +165,7 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
     setSuccess('');
 
     try {
-      const response = await fetch(`/api/blogs/${blogId}`, {
+      const response = await fetch(`/api/blogs/id/${blogId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -189,10 +194,20 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
               Edit Blog - {blogId}
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Enter password to access
+              Enter credentials to access
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+            <div>
+              <input
+                type="text"
+                required
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
             <div>
               <input
                 type="password"
@@ -266,7 +281,7 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
                 ← Back to Dashboard
               </button>
               <button
-                onClick={() => window.open(`/blog/${blogId}`, '_blank')}
+                onClick={() => window.open(`/blog/${blogSlug}`, '_blank')}
                 className="text-blue-600 hover:text-blue-800 text-sm"
               >
                 View Live →
@@ -422,21 +437,21 @@ export default function EditBlogPage({ params }: EditBlogPageProps) {
                       setKeywordsInput(input);
                       
                       // Update keywords array in real time
-                      const keywordsArray = input.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                      const keywordsText = input.trim();
                       setBlogData(prev => ({ 
                         ...prev, 
                         seo: { 
                           ...prev.seo, 
-                          keywords: keywordsArray
+                          keywords: keywordsText
                         }
                       }));
                     }}
                   />
-                  {blogData.seo.keywords.length > 0 && (
+                  {blogData.seo.keywords && blogData.seo.keywords.trim().length > 0 && (
                     <div className="mt-2">
                       <p className="text-xs text-gray-500 mb-1">Keywords preview:</p>
                       <div className="flex flex-wrap gap-1">
-                        {blogData.seo.keywords.map((keyword, index) => (
+                        {blogData.seo.keywords.split(',').map((keyword, index) => keyword.trim()).filter(Boolean).map((keyword, index) => (
                           <span
                             key={index}
                             className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"

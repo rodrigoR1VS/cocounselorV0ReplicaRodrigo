@@ -1,0 +1,12 @@
+
+const type = "service_account";
+const project_id = "cocounselor-blogs";
+const private_key_id="6af9ce75d19aa704cccbb6e99b0fed92c6831f53";
+const private_key="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCsBGUGJaDKagU5\nbo8tkHD6pOIXqvVFaDUvFDKVNKaV6ZcneCkkjKIP9TpAznwBMeSM2dNgGdstshGV\nixphllX4ksygcOT1T5ncnasvsPn0R1Y3vVL3uGZlTNoopj+eS6fhqelHdrxmuspU\nZTtKzIDkqvXUshy5fTeJHKGVk6O6aXSl7+k5Wmns0ccZAD9+l9pravcvj8XksX6S\nvE7AWwmVUZL18KbgWsbfrKy5CaqO5OulrJoscXQ1719scJpDkfh9WVFAiPy5cu+I\nm66+ZiJPk97rN2XKRJmwsey2mUCicQfjEa8UaNTch+xByIHkaaPj0JFMhEJDd3L5\nvSa/4lQPAgMBAAECggEAAZcfnGE84NIx6F64zSa9aXVpYuc7BRONdlKp+w4oqIP0\nPuWrmU5n8ZAGiow+KKarVcM6/I1dca+bqpwsHl3Zv2zgBNW2XPw86gWJ8rltcV0D\n4Fg/cmt06uSjs0xO+naTMt3NLdKpTQvW2Tvl9e8sSLDtIxr4czb3DGBeFng63Ps4\nf5H0q1NXyWzJKNRhW9exaG59MBD4dJskCXO+iTMw+y2kX8MPTBt+Sbk1HwwOILME\nkw8vZTPDSLzzONxBCqMPJpc8NqA5MCwVG20BPGHRGInKPD1mTna64hYCUHODbALy\nZJfkp9EQ0kEf++ofMmYgHs74u4bgiYYdny9VtO0AQQKBgQDus3TaS9dOlbODxW7+\nPymv4wVKsTVkpCQiy2+OpoyQxeVMfBmXBZlY+vbluRNS4rWwYPiBu3WCcyA2bAqb\nPdnjp6iMRubybh/Rh4nDKjBKHXtNiUqhwbmTybttbwslYYdcBsEY+VhgVbIaKy0o\nQV5mITDDaynn9nIRIxCzH1NWTwKBgQC4e8Y04JQAhj1ooLOGh7NEjJTRZdKeGpHn\nS4MBh3qnTKVK03ua9ZbMvYC7shpvhYFhAiH3vohkpD9E96mY562buMEeb/aJY0BS\n+9Nnl3vSYk+BcPOXQzbsYC9TL6EWrg+RmwrkuyUkaPGwsXR5ZqhSs9b3imVabVzz\nGRGP8792QQKBgQCKPL+VlIpyZlv6GiL3dxjrVaxA33Oufyi2Rd6rXGTXiuQKcWxY\ne9OdJmpKC+7W95iFNwN0Dl41V/r1yYgy85T2NKh15LHnAEPJEpeDwTEKGxzHgJUK\nLKkOn6u96qsn0N2VPAwkLHM0By0H3q1ePM0wlFQrOCqivaS9q/MF6URYHQKBgAYA\nYM5PkAEEXPMOZ0i1GWvdduno+hUSoDR6DGT8V00h/S6V+qtr2eAHOizg+mMuYKsb\nOqeolx9PCI/hzq6eutMaC45F7itCA1Gvx4zTLMAHWrbHSeVd1meSKXf3ULJAL1l5\nRb1zKR4qG9K3syZP5KHsH84lvm5WqHNwGVYpg80BAoGBAN4QTZ1yC122SqgRF7yE\nQMAyZii/w+StRF2TmXfEs0e1mSKPTq+WvRoOoCpZv4GA4uMHZxMpkX4jkXpZJdXR\nuaa+mphII1OryBjoEaZkIWqHK/IaIR3WqEUeet8IDe+MXCfJUXGzFjFV7trR6w/8\nkcq9VDucyfSPFnfSwXYD18c7\n-----END PRIVATE KEY-----\n";
+const client_email = "firebase-adminsdk-fbsvc@cocounselor-blogs.iam.gserviceaccount.com";
+const client_id = "108798449425374750192";
+const auth_uri = "https://accounts.google.com/o/oauth2/auth";
+const token_uri = "https://oauth2.googleapis.com/token";
+const auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs";
+const client_x509_cert_url = "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40cocounselor-blogs.iam.gserviceaccount.com";
+const universe_domain = "googleapis.com";

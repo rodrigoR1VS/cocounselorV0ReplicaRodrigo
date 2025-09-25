@@ -1,9 +1,19 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { BlogPreview } from '@/lib/blog';
+
+interface Blog {
+  id: number;
+  slug: string;
+  publishedDate: string;
+  title: string;
+  subtitle: string;
+  bannerImage: string;
+  content: any[];
+  seo: any;
+}
 
 interface BlogPreviewCardProps {
-  blog: BlogPreview;
+  blog: Blog;
 }
 
 // Function to format date for display
@@ -18,7 +28,7 @@ function formatDate(dateString: string): string {
 
 export default function BlogPreviewCard({ blog }: BlogPreviewCardProps) {
   return (
-    <Link href={`/blog/${blog.blogId}`} className="group">
+    <Link href={`/blog/${blog.slug}`} className="group">
       <article className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg hover:border-blue-300 transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col">
         
         {/* Banner Image */}
